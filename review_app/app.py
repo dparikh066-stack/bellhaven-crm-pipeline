@@ -132,6 +132,12 @@ def render_card(p, show_actions=True):
                 <button class="reject" type="submit">Reject</button>
             </form>
         </div>''')
+    if show_actions and p["status"] == "rejected":
+        parts.append(f'''<div class="btns">
+            <form style="display:inline" method="post" action="{url_for('reopen', proposal_id=p["id"])}">
+                <button class="reject" type="submit">Reopen for review</button>
+            </form>
+        </div>''')
     parts.append("</div>")
     return "".join(parts)
 
@@ -185,11 +191,15 @@ def index():
 def decided():
     all_p = store.list_proposals()
     decided_list = [p for p in all_p if p["status"] != "pending"]
-    body = [f'<h2>Decided history ({len(decided_list)})</h2>']
+    flash = request.args.get("flash", "")
+    body = []
+    if flash:
+        body.append(f'<div class="flash">{flash}</div>')
+    body.append(f'<h2>Decided history ({len(decided_list)})</h2>')
     if not decided_list:
         body.append('<p class="muted">Nothing decided yet.</p>')
     for p in decided_list:
-        body.append(render_card(p, show_actions=False))
+        body.append(render_card(p, show_actions=True))
     return render("".join(body))
 
 
@@ -222,6 +232,19 @@ def reject(proposal_id):
         return redirect(url_for("index", flash="That proposal is no longer pending."))
     store.set_status(proposal_id, "rejected", "Rejected by reviewer.", now)
     return redirect(url_for("index", flash=f"Rejected proposal {proposal_id}."))
+
+
+@app.route("/proposals/<int:proposal_id>/reopen", methods=["POST"])
+def reopen(proposal_id):
+    p = store.get_proposal(proposal_id)
+    now = pipeline.now_iso()
+    if p is None or p["status"] != "rejected":
+        # Only rejected proposals can be reopened -- an "approved" one already
+        # made a real CRM write, and re-approving it later would apply that
+        # write a second time (there's no delete/merge to undo it with).
+        return redirect(url_for("decided", flash="Only rejected proposals can be reopened."))
+    store.reopen_proposal(proposal_id, now)
+    return redirect(url_for("index", flash=f"Reopened proposal {proposal_id} for review."))
 
 
 @app.route("/run-now", methods=["POST"])

@@ -177,6 +177,19 @@ def set_status(proposal_id, status, decision_note, now):
         conn.commit()
 
 
+def reopen_proposal(proposal_id, now):
+    """Undo a reject/approve decision -- puts the proposal back in the
+    pending queue for reconsideration. Note this only reverses the local
+    review-queue record; it does NOT undo any CRM write an 'approve' already
+    made (there's no delete/merge in the CRM API to undo it with)."""
+    with closing(_connect()) as conn:
+        conn.execute(
+            "UPDATE proposals SET status = 'pending', decision_note = NULL, decided_at = NULL, updated_at = ? WHERE id = ?",
+            (now, proposal_id),
+        )
+        conn.commit()
+
+
 def last_run():
     with closing(_connect()) as conn:
         row = conn.execute("SELECT * FROM runs ORDER BY started_at DESC LIMIT 1").fetchone()
