@@ -10,6 +10,20 @@ how the change-of-ownership (CHOW) SOP is implemented, the data-quality
 issues found in this dataset and how each was resolved, and one case
 (Kettering) deliberately left for human judgment instead of auto-resolved.
 
+For a walkthrough with flow diagrams, code excerpts, app screenshots, and
+the full change log from the live run, see
+**[Bellhaven_CRM_Pipeline.pdf](Bellhaven_CRM_Pipeline.pdf)** or
+**[Bellhaven_CRM_Pipeline.pptx](Bellhaven_CRM_Pipeline.pptx)** (same content,
+two formats). Both are generated from `docs/content.py`; to regenerate them:
+
+```
+pip install -r docs/requirements.txt
+python docs/gen_diagrams.py       # rebuilds docs/diagrams/*.png
+python docs/take_screenshots.py   # rebuilds docs/screenshots/*.png (needs the review app running + Edge)
+python docs/generate_pdf.py       # -> Bellhaven_CRM_Pipeline.pdf
+python docs/generate_pptx.py      # -> Bellhaven_CRM_Pipeline.pptx
+```
+
 ## Quick start
 
 ```
