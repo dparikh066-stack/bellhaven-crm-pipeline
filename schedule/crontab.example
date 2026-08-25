@@ -1,0 +1,8 @@
+# Daily Bellhaven CRM sync. Runs the scraper + matcher and refreshes the
+# local review queue (data/pipeline.db). Never writes to the CRM itself --
+# a human still has to open the review app and approve/reject.
+#
+# Install with: crontab schedule/crontab.example  (adjust the path first)
+#
+# min hour dom month dow command
+0 6 * * * cd /opt/bellhaven-crm-pipeline && /usr/bin/python3 pipeline.py >> logs/pipeline.log 2>&1

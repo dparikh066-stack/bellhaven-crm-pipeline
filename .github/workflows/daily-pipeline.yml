@@ -1,0 +1,35 @@
+name: Daily Bellhaven CRM Sync
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # 06:00 UTC daily
+  workflow_dispatch: {}
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      # data/pipeline.db is the idempotency ledger -- it has to survive
+      # between runs or every run would look "new" and re-propose things
+      # a reviewer already decided. Simplest option on a free runner is to
+      # commit it back to the repo; swap this for a hosted DB (Postgres,
+      # etc.) if the proposal volume or audit trail outgrows a flat file.
+      - run: python pipeline.py
+        env:
+          BELLHAVEN_CRM_TOKEN: ${{ secrets.BELLHAVEN_CRM_TOKEN }}
+
+      - name: Persist proposal state
+        run: |
+          git config user.name "bellhaven-pipeline-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/pipeline.db data/locations.json
+          git diff --cached --quiet || git commit -m "Daily pipeline run: refresh proposal queue"
+          git push
