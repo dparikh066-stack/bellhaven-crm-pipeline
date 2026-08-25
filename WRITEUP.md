@@ -23,19 +23,7 @@ Files:
 - `schedule/crontab.example`, `.github/workflows/daily-pipeline.yml` —
   schedule configs (not live, per the assignment).
 
-## Setup
-
-```
-pip install -r requirements.txt
-$env:BELLHAVEN_CRM_TOKEN = "your-token-here"   # PowerShell
-# export BELLHAVEN_CRM_TOKEN=your-token-here   # bash
-
-python pipeline.py          # scrape + match, populate the review queue
-python -m review_app.app    # open http://127.0.0.1:5000 and review
-```
-
-`BELLHAVEN_CRM_TOKEN` is required (no default) so the token never has to
-live in the repo.
+See [README.md](README.md) for setup and how to run it.
 
 ## How matching works
 
