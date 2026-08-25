@@ -96,12 +96,12 @@ than reflexively approve.
 | Wrong parent, no billing history | Findlay, Lima | re-parented directly |
 | Wrong parent, real revenue + AR | Marietta, Tiffin | CHOW split (old preserved, new created) |
 | Exact duplicate account, same address | Owosso (×2), plus stale pre-acquisition records at Port Clinton, Erie, and Monroe | marked `duplicate_of_account` + `Inactive` |
-| Multiple same-address accounts, no clear survivor | **Kettering** — three unrelated pre-acquisition records (Harborview, Cedar Trail, and an unparented one), none Bellhaven-branded | left pending — see below |
+| Multiple same-address accounts, no clear survivor | **Kettering** — three unrelated pre-acquisition records (Harborview, Cedar Trail, and an unparented one), none Bellhaven-branded | rejected by the reviewer — see below |
 | Account still active, no longer on website | Alliance, Coldwater, Sandusky | flagged `Needs Review` (not auto-closed) |
 | New community, no CRM account | Batavia, Union Square, Carlisle, Amberly Manor (Hudson) | created |
 | Name collision, unrelated facility | "Amberly Manor" also exists in CRM as an unrelated Juniper Point account in Colorado Springs | correctly *not* matched — different state entirely; new account created for the Hudson, OH one instead |
 
-### Kettering: left unresolved, deliberately
+### Kettering: no auto-pick, and the reviewer rejected all three
 
 Three different CRM accounts sit at 3313 Wilmington Pike — "Kettering Care
 Centre" (Harborview), "Kettering Nursing & Rehabilitation" (unparented), and
@@ -110,10 +110,16 @@ correctly named or parented for Bellhaven. All three have zero revenue and
 zero AR, so there's no billing signal to break the tie, and nothing in the
 scraped data indicates which pre-acquisition entity is the one that's
 supposed to continue as "Bellhaven of Kettering." Auto-picking one risked
-silently misattributing history to the wrong legal entity. I generated all
-three as mutually-exclusive alternatives in the review app and left them
-pending rather than guess — this is a case that genuinely needs a person
-with more context (e.g., corporate development) to resolve, not a heuristic.
+silently misattributing history to the wrong legal entity, so the pipeline
+generated all three as mutually-exclusive alternatives rather than guess.
+
+In review, all three were rejected rather than one being approved — a
+legitimate call: none of the three existing records could be confidently
+tied to the facility now branded "Bellhaven of Kettering," so nothing was
+force-fit. The CRM is left with three untouched legacy accounts at that
+address and no "Bellhaven of Kettering" record; that gap is real and would
+need a person with more context (e.g. corporate development, who'd know
+which legal entity Bellhaven actually acquired) to resolve properly.
 
 ## Idempotency
 
