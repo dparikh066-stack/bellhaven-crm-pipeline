@@ -321,51 +321,55 @@ def build_proposals(locations, accounts):
                 continue
             claimed_account_ids.add(a["account_id"])
             if needs_chow_split(a):
+                explanation = (
+                    f"Daily Bellhaven sync: sits at the same address as {anchor_acct['name']!r} "
+                    f"(account {anchor_acct['account_id']}), which is already the correct match for "
+                    f"{loc['name']!r}. Looks like a stale duplicate, but has lifetime_revenue={a['lifetime_revenue']} "
+                    f"and outstanding_ar={a['outstanding_ar']}, so NOT auto-marked a duplicate -- needs human review."
+                )
                 proposals.append({
                     "change_type": "flag_review",
                     "classification": "duplicate_needs_review",
                     "location_slug": loc["slug"],
                     "account_ids": [a["account_id"]],
-                    "proposed_changes": {"status": "Needs Review"},
+                    "proposed_changes": {"status": "Needs Review", "note": explanation},
                     "evidence": {"location": loc, "account": a, "score": s, "matched_account_id": anchor_acct["account_id"]},
-                    "note": (
-                        f"{a['name']!r} sits at the same address as {anchor_acct['name']!r} (which is already the "
-                        f"correct match for {loc['name']!r}) and looks like a stale duplicate, but it has "
-                        f"lifetime_revenue={a['lifetime_revenue']} and outstanding_ar={a['outstanding_ar']}, so it is NOT "
-                        f"auto-marked a duplicate. Flagging for human review instead."
-                    ),
+                    "note": explanation,
                 })
             else:
+                explanation = (
+                    f"Daily Bellhaven sync: duplicate of account {anchor_acct['account_id']} "
+                    f"({anchor_acct['name']!r}), which is the correct match for {loc['name']!r} at this address. "
+                    f"No revenue/AR on this account, so marked Inactive."
+                )
                 proposals.append({
                     "change_type": "mark_duplicate",
                     "classification": "duplicate",
                     "location_slug": loc["slug"],
                     "account_ids": [a["account_id"]],
-                    "proposed_changes": {"duplicate_of_account": anchor_acct["account_id"], "status": "Inactive"},
+                    "proposed_changes": {"duplicate_of_account": anchor_acct["account_id"], "status": "Inactive", "note": explanation},
                     "evidence": {"location": loc, "account": a, "score": s, "matched_account_id": anchor_acct["account_id"]},
-                    "note": (
-                        f"{a['name']!r} sits at the same address as {anchor_acct['name']!r}, which is already the "
-                        f"correct match for {loc['name']!r}. No revenue/AR on {a['name']!r}, so marking it a duplicate."
-                    ),
+                    "note": explanation,
                 })
 
     # Pass 3: orphans -- Bellhaven-parented accounts no location claimed.
     for a in accounts:
         if a["parent_id"] == bh_parent_id and a["account_id"] not in claimed_account_ids and a["status"] != "Inactive":
+            explanation = (
+                f"Daily Bellhaven sync: under Bellhaven Senior Living in the CRM but no longer appears on the "
+                f"Bellhaven website ({len(locations)} communities scraped). "
+                f"lifetime_revenue={a['lifetime_revenue']}, outstanding_ar={a['outstanding_ar']}. "
+                + ("Has real billing history -- do not deactivate without billing team sign-off. " if (a['lifetime_revenue'] or a['outstanding_ar']) else "")
+                + "Flagged for human review rather than assuming closure/divestiture."
+            )
             proposals.append({
                 "change_type": "flag_review",
                 "classification": "orphan",
                 "location_slug": None,
                 "account_ids": [a["account_id"]],
-                "proposed_changes": {"status": "Needs Review"},
+                "proposed_changes": {"status": "Needs Review", "note": explanation},
                 "evidence": {"account": a},
-                "note": (
-                    f"{a['name']!r} is under Bellhaven Senior Living in the CRM but no longer appears on the "
-                    f"Bellhaven website ({len(locations)} communities scraped). "
-                    f"lifetime_revenue={a['lifetime_revenue']}, outstanding_ar={a['outstanding_ar']}. "
-                    + ("Has real billing history -- do not deactivate without billing team sign-off. " if (a['lifetime_revenue'] or a['outstanding_ar']) else "")
-                    + "Flagging for human review rather than assuming closure/divestiture."
-                ),
+                "note": explanation,
             })
 
     return proposals

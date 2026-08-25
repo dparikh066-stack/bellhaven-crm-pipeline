@@ -64,6 +64,12 @@ From there:
   especially since one of the two orphans found, Sandusky, has $130k
   lifetime revenue and $5.2k outstanding AR).
 
+Both duplicate and orphan proposals also write an explanation into the
+CRM's free-text `note` field (not just the review app's evidence panel) --
+`status` alone doesn't say *why* an account was deactivated or flagged, and
+the assignment specifically calls out `note` as one of the two tools for
+expressing exactly this kind of non-field-update finding.
+
 ## The CHOW SOP
 
 Implemented literally: before re-parenting an existing account, check
